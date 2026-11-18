@@ -1,0 +1,13 @@
+message,label
+"Congratulations! You won 1000 euros!",spam
+"Hello, how are you?",ham
+"You have won a free iPhone!",spam
+"Are we meeting tomorrow?",ham
+"Click here to claim your prize!",spam
+"Can you send me the homework?",ham
+"Free money! Claim your reward now!",spam
+"See you at school tomorrow.",ham
+"Win a free vacation today!",spam
+"Please call me when you arrive.",ham
+"URGENT! You won a cash prize!",spam
+"How was your weekend?",ham
