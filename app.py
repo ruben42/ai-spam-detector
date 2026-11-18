@@ -15,77 +15,105 @@ def load_model():
 
 model = load_model()
 
-# Cabecalho
+# Inicializar historico
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+# Titulo
 st.title("🤖 AI Spam Detector")
 
 st.markdown(
-    "### Inteligencia Artificial para deteccao de SPAM"
-)
-
-st.write(
-    "Introduz uma mensagem e deixa a nossa IA "
-    "analisar o seu conteudo."
+    "Classifica mensagens utilizando Machine Learning."
 )
 
 st.divider()
 
-# Entrada do utilizador
+# Entrada da mensagem
 message = st.text_area(
-    "Escreve a tua mensagem:",
-    placeholder="Exemplo: Congratulations! You won a prize!",
-    height=150
+    "Escreve uma mensagem:",
+    placeholder="Exemplo: Congratulations! You won a prize!"
 )
 
 # Botao de analise
 if st.button("🔍 Analisar mensagem", use_container_width=True):
 
-    if message.strip():
+    if not message.strip():
+        st.warning("Escreve uma mensagem primeiro.")
 
-        # Previsao
+    else:
         prediction = model.predict([message])[0]
 
-        # Probabilidades
         probabilities = model.predict_proba([message])[0]
 
-        # Obter as classes
         classes = model.classes_
 
-        # Encontrar a probabilidade da previsao
         confidence = probabilities[
             list(classes).index(prediction)
         ]
 
-        # Apresentar resultado
-        st.divider()
+        # Guardar no historico
+        st.session_state.history.append({
+            "message": message,
+            "prediction": prediction,
+            "confidence": float(confidence)
+        })
 
-        st.subheader("Resultado da analise")
+        st.subheader("Resultado")
 
         if prediction == "spam":
             st.error("⚠️ SPAM DETETADO!")
         else:
             st.success("✅ MENSAGEM NORMAL (HAM)")
 
-        # Mostrar confianca estimada
         st.write(
-            f"Confiança estimada: {confidence * 100:.2f}%"
+            f"Confianca estimada: {confidence * 100:.2f}%"
         )
 
         st.progress(float(confidence))
 
-        # Mostrar probabilidades das categorias
-        st.subheader("Probabilidades por categoria")
-
-        for category, probability in zip(classes, probabilities):
-            st.write(
-                f"{category.upper()}: {probability * 100:.2f}%"
-            )
-
-    else:
-        st.warning("Por favor, escreve uma mensagem.")
-
+# Estatisticas
 st.divider()
+st.subheader("📊 Estatisticas")
+
+total = len(st.session_state.history)
+
+spam_count = sum(
+    item["prediction"] == "spam"
+    for item in st.session_state.history
+)
+
+ham_count = total - spam_count
+
+col1, col2, col3 = st.columns(3)
+
+col1.metric("Total", total)
+col2.metric("SPAM", spam_count)
+col3.metric("HAM", ham_count)
+
+# Historico
+st.divider()
+st.subheader("📜 Historico de analises")
+
+if st.session_state.history:
+
+    for item in reversed(st.session_state.history):
+
+        st.write("Mensagem:", item["message"])
+        st.write("Classificacao:", item["prediction"].upper())
+
+        st.write(
+            f"Confianca: {item['confidence'] * 100:.2f}%"
+        )
+
+        st.divider()
+
+    if st.button("Limpar historico"):
+        st.session_state.history = []
+        st.rerun()
+
+else:
+    st.info("Ainda nao existem mensagens analisadas.")
 
 st.caption(
-    "AI Spam Detector | Desenvolvido com Python, "
-    "Scikit-learn e Streamlit."
+    "AI Spam Detector | Python + Scikit-learn + Streamlit"
 )
